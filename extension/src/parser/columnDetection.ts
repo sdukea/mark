@@ -65,9 +65,9 @@ function scoreHeader(header: string, rule: KeywordRule): number {
     if (normalized === keyword) {
       best = Math.max(best, 1.0);
     } else if (new RegExp(`\\b${escapeRegExp(keyword)}\\b`).test(normalized)) {
+      // Word-boundary match only — a plain substring check would let e.g.
+      // "Remarks" match the "marks" keyword, or "Guidance" match "id".
       best = Math.max(best, 0.75);
-    } else if (normalized.includes(keyword)) {
-      best = Math.max(best, 0.5);
     }
   }
   return best;
@@ -99,7 +99,8 @@ const AMBIGUITY_MARGIN = 0.15;
 
 function toResult(candidates: ColumnDetectionCandidate[]): ColumnDetectionResult {
   if (candidates.length === 0) return { candidates, autoSelected: null };
-  const [top, second] = candidates;
+  const top = candidates[0]!;
+  const second = candidates[1];
   const isAmbiguous =
     second !== undefined &&
     top.confidence - second.confidence < AMBIGUITY_MARGIN &&

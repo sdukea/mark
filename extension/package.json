@@ -7,10 +7,10 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "vitest run",
+    "test": "vitest run --config vitest.config.ts",
     "dev": "vite",
     "build": "vite build",
-    "test:watch": "vitest",
+    "test:watch": "vitest --config vitest.config.ts",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [],

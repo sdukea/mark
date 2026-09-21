@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ESPro :: Internal Marks Entry</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- This page intentionally mimics a legacy, server-rendered university ERP:
+       plain HTML tables, ASP.NET-WebForms-style non-semantic control IDs,
+       jQuery-driven postback handlers, no client-side framework. -->
+  <header class="topbar">
+    <div class="topbar__brand">ESPro <span>Academic Suite</span></div>
+    <div class="topbar__user">Faculty: Dr. R. Kulkarni &nbsp;|&nbsp; <a href="#">Logout</a></div>
+  </header>
+
+  <div class="breadcrumb">Home &rsaquo; Examinations &rsaquo; Internal Marks Entry &rsaquo; Enter Marks</div>
+
+  <main class="content">
+    <div class="panel panel--header">
+      <table class="meta-table">
+        <tr><td class="meta-label">Programme</td><td id="ctl00_MainContent_lblProgramme">B.Tech Computer Science &amp; Engineering</td>
+            <td class="meta-label">Semester</td><td id="ctl00_MainContent_lblSemester">5</td></tr>
+        <tr><td class="meta-label">Section</td><td id="ctl00_MainContent_lblSection">A</td>
+            <td class="meta-label">Course</td><td id="ctl00_MainContent_lblCourse">CS301 - Database Management Systems</td></tr>
+        <tr><td class="meta-label">Assessment</td><td id="ctl00_MainContent_lblAssessment">Internal Assessment 1</td>
+            <td class="meta-label">Max Marks</td><td id="ctl00_MainContent_lblMaxMarks">20</td></tr>
+      </table>
+    </div>
+
+    <div class="panel">
+      <div class="panel__title">Student Marks Entry</div>
+
+      <form id="frmMarks" autocomplete="off">
+        <table class="grid" id="ctl00_MainContent_gvMarks">
+          <thead>
+            <tr>
+              <th class="col-sl">Sl. No</th>
+              <th class="col-usn">USN</th>
+              <th class="col-name">Student Name</th>
+              <th class="col-marks">Marks Obtained<br><span class="hint">(out of 20)</span></th>
+              <th class="col-status">Status</th>
+            </tr>
+          </thead>
+          <tbody id="studentTableBody">
+            <!-- rows injected by app.js, mirroring server-side rendering -->
+          </tbody>
+        </table>
+
+        <div class="pagination" id="paginationControls">
+          <button type="button" id="btnPrevPage" class="btn btn--secondary">&larr; Previous</button>
+          <span id="pageIndicator" class="page-indicator">Page 1 of 1</span>
+          <button type="button" id="btnNextPage" class="btn btn--secondary">Next &rarr;</button>
+        </div>
+
+        <div class="actions">
+          <span id="saveBanner" class="save-banner" hidden></span>
+          <button type="button" id="btnSave" class="btn btn--primary">Save Marks</button>
+          <button type="button" id="btnSubmit" class="btn btn--danger">Submit Final</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <footer class="footer">ESPro Academic Suite &copy; 2026 &mdash; Demo / mock instance for extension development only.</footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

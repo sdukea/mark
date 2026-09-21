@@ -1,5 +1,5 @@
 import { defineManifest } from "@crxjs/vite-plugin";
-import pkg from "./package.json";
+import pkg from "./package.json" with { type: "json" };
 
 // NOTE: "matches" currently targets our local mock ESPro instance
 // (mock-espro/, served on http://localhost:8765) for development and

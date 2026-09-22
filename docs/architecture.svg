@@ -1,0 +1,58 @@
+<svg viewBox="0 0 980 320" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <rect x="0" y="0" width="980" height="320" rx="12" fill="#f6f7f9"/>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#6b7078"/>
+    </marker>
+  </defs>
+
+  <!-- Pipeline row -->
+  <g font-size="13" font-weight="600" fill="#1b1d22">
+    <!-- Excel -->
+    <rect x="24" y="60" width="150" height="72" rx="8" fill="#ffffff" stroke="#e3e5e9"/>
+    <text x="99" y="90" text-anchor="middle">Excel</text>
+    <text x="99" y="108" text-anchor="middle" font-size="11" font-weight="400" fill="#6b7078">.xlsx mark list</text>
+
+    <line x1="174" y1="96" x2="208" y2="96" stroke="#6b7078" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <!-- Parser -->
+    <rect x="208" y="60" width="150" height="72" rx="8" fill="#ffffff" stroke="#e3e5e9"/>
+    <text x="283" y="90" text-anchor="middle">parser/</text>
+    <text x="283" y="108" text-anchor="middle" font-size="11" font-weight="400" fill="#6b7078">columns, records</text>
+
+    <line x1="358" y1="96" x2="392" y2="96" stroke="#6b7078" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <!-- Matcher -->
+    <rect x="392" y="60" width="150" height="72" rx="8" fill="#ffffff" stroke="#e3e5e9"/>
+    <text x="467" y="90" text-anchor="middle">matcher/</text>
+    <text x="467" y="108" text-anchor="middle" font-size="11" font-weight="400" fill="#6b7078">Excel × ESPro</text>
+
+    <line x1="542" y1="96" x2="576" y2="96" stroke="#6b7078" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <!-- Preview -->
+    <rect x="576" y="60" width="150" height="72" rx="8" fill="#ffffff" stroke="#e3e5e9"/>
+    <text x="651" y="90" text-anchor="middle">Preview</text>
+    <text x="651" y="108" text-anchor="middle" font-size="11" font-weight="400" fill="#6b7078">review &amp; confirm</text>
+
+    <line x1="726" y1="96" x2="760" y2="96" stroke="#6b7078" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <!-- Fill + verify -->
+    <rect x="760" y="60" width="196" height="72" rx="8" fill="#2452c9"/>
+    <text x="858" y="90" text-anchor="middle" fill="#ffffff">Fill + Verify</text>
+    <text x="858" y="108" text-anchor="middle" font-size="11" font-weight="400" fill="#dce4fb">read every value back</text>
+  </g>
+
+  <!-- ESPro adapter, underneath, feeding matcher + fill -->
+  <rect x="392" y="220" width="360" height="72" rx="8" fill="#ffffff" stroke="#2452c9" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="572" y="250" text-anchor="middle" font-size="13" font-weight="600" fill="#2452c9">espro/ adapter</text>
+  <text x="572" y="268" text-anchor="middle" font-size="11" font-weight="400" fill="#6b7078">the only file that reads ESPro's real DOM</text>
+  <text x="572" y="283" text-anchor="middle" font-size="10.5" font-weight="400" fill="#96660a">mock-espro today → swap in the real one later</text>
+
+  <line x1="572" y1="220" x2="572" y2="140" stroke="#2452c9" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <line x1="572" y1="140" x2="467" y2="140" stroke="#2452c9" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+  <line x1="572" y1="140" x2="858" y2="140" stroke="#2452c9" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+
+  <text x="24" y="30" font-size="14" font-weight="700" fill="#1b1d22">READ → MATCH → VALIDATE → PREVIEW → CONFIRM → FILL → VERIFY</text>
+  <text x="24" y="48" font-size="11" fill="#6b7078">Nothing is written to ESPro without an explicit status and a human looking at the preview first.</text>
+</svg>

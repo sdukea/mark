@@ -245,7 +245,7 @@ export function App() {
           outcomes={phase.outcomes}
           onDone={() => {
             void restoreBrowserWindow();
-            setPhase({ name: "no-file" });
+            window.close();
           }}
         />
       )}

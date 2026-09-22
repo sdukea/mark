@@ -66,18 +66,23 @@ async function openOrFocusAppWindow(): Promise<void> {
 
   const { left, top } = await computeWindowPosition();
   const url = chrome.runtime.getURL("src/popup/index.html") + "?app=1";
-  const win = await chrome.windows.create({
-    url,
-    type: "popup",
-    width: APP_WINDOW_WIDTH,
-    height: APP_WINDOW_HEIGHT,
-    left,
-    top,
-    focused: true,
-  });
-  if (win?.id !== undefined) {
-    await chrome.storage.session.set({ [APP_WINDOW_KEY]: win.id });
-  }
+  const bounds = { left, top, width: APP_WINDOW_WIDTH, height: APP_WINDOW_HEIGHT };
+  console.log("[Mark] creating app window", bounds);
+
+  const win = await chrome.windows.create({ url, type: "popup", state: "normal", ...bounds, focused: true });
+  console.log("[Mark] window.create result", win && { id: win.id, left: win.left, top: win.top, width: win.width, height: win.height, state: win.state });
+
+  if (win?.id === undefined) return;
+
+  // On some Chrome/OS combinations a popup-type window's requested bounds
+  // aren't reliably honored at creation time — the window can paint at a
+  // tiny default size regardless of what was requested. An explicit
+  // update() immediately after create() is the known-reliable way to force
+  // the real size/position to stick.
+  const updated = await chrome.windows.update(win.id, { ...bounds, focused: true, state: "normal" });
+  console.log("[Mark] window.update result", updated && { left: updated.left, top: updated.top, width: updated.width, height: updated.height, state: updated.state });
+
+  await chrome.storage.session.set({ [APP_WINDOW_KEY]: win.id });
 }
 
 /**
@@ -85,16 +90,19 @@ async function openOrFocusAppWindow(): Promise<void> {
  * toolbar icon was clicked. Since that icon sits right at the top edge of
  * the screen, an un-positioned window can end up with most of its height
  * computed above the visible screen — leaving only a tiny sliver on
- * screen. Anchoring explicitly off the current browser window's bounds
- * (with a safe minimum top/left) keeps the whole window on screen.
+ * screen. Anchoring explicitly off the last-focused normal browser
+ * window's bounds (with a safe minimum top/left) keeps the whole window
+ * on screen. Uses getLastFocused rather than getCurrent since this code
+ * runs in the service worker, which has no window of its own to be
+ * "current" relative to.
  */
 async function computeWindowPosition(): Promise<{ left: number; top: number }> {
   try {
-    const current = await chrome.windows.getCurrent();
-    if (current.left !== undefined && current.top !== undefined && current.width !== undefined) {
+    const win = await chrome.windows.getLastFocused({ windowTypes: ["normal"] });
+    if (win.left !== undefined && win.top !== undefined && win.width !== undefined) {
       return {
-        left: Math.max(20, current.left + current.width - APP_WINDOW_WIDTH - 40),
-        top: Math.max(60, current.top + 80),
+        left: Math.max(20, win.left + win.width - APP_WINDOW_WIDTH - 40),
+        top: Math.max(60, win.top + 80),
       };
     }
   } catch {

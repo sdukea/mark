@@ -137,7 +137,7 @@ whole popup down mid-selection. Mark's toolbar icon is a one-shot
 launcher: it asks the background service worker to open (or refocus) a
 real, independent `chrome.windows.create` window, which behaves like any
 other window and is safe to open native dialogs from. See
-[`extension/src/background/index.ts`](extension/src/background/index.ts).
+[`extension/src/background/service-worker.ts`](extension/src/background/service-worker.ts).
 </details>
 
 ## Tests

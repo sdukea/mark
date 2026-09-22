@@ -19,13 +19,18 @@ export default defineManifest({
     default_title: "Mark — fill ESPro marks from Excel",
   },
   background: {
-    service_worker: "src/background/index.ts",
+    // Deliberately NOT named index.ts, matching content-script.ts below:
+    // when both entries were named index.ts, the build tool's chunk
+    // naming collided them and wired the service worker to the content
+    // script's compiled bundle instead of its own — a real bug we hit
+    // and fixed (see git history for src/background and src/content).
+    service_worker: "src/background/service-worker.ts",
     type: "module",
   },
   content_scripts: [
     {
       matches: ESPRO_MATCH_PATTERNS,
-      js: ["src/content/index.ts"],
+      js: ["src/content/content-script.ts"],
       run_at: "document_idle",
     },
   ],

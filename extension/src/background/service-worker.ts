@@ -21,6 +21,9 @@ const WORKBOOK_KEY = "parsedWorkbook";
  */
 const APP_WINDOW_KEY = "appWindowId";
 
+/** The browser window we shrank to make room for the docked app window, so "Done" can maximize it back. */
+const DOCKED_BROWSER_WINDOW_KEY = "dockedBrowserWindowId";
+
 // Unconditional — if this line isn't the first thing in the service
 // worker's console after a reload, the new build isn't running yet.
 console.log("[Mark] background service worker started", new Date().toISOString());
@@ -50,10 +53,14 @@ async function handleMessage(message: BackgroundRequest): Promise<BackgroundResp
       await openOrFocusAppWindow();
       return { type: "OK" };
     }
+    case "RESTORE_BROWSER_WINDOW": {
+      await restoreBrowserWindow();
+      return { type: "OK" };
+    }
   }
 }
 
-const APP_WINDOW_WIDTH = 420;
+const FALLBACK_APP_WINDOW_WIDTH = 420;
 const APP_WINDOW_HEIGHT = 680;
 
 async function openOrFocusAppWindow(): Promise<void> {
@@ -69,9 +76,9 @@ async function openOrFocusAppWindow(): Promise<void> {
     }
   }
 
-  const { left, top, height } = await arrangeSideBySide();
+  const { left, top, width, height } = await arrangeSideBySide();
   const url = chrome.runtime.getURL("src/popup/index.html") + "?app=1";
-  const bounds = { left, top, width: APP_WINDOW_WIDTH, height };
+  const bounds = { left, top, width, height };
   console.log("[Mark] creating app window", bounds);
 
   const win = await chrome.windows.create({ url, type: "popup", state: "normal", ...bounds, focused: true });
@@ -90,20 +97,22 @@ async function openOrFocusAppWindow(): Promise<void> {
   await chrome.storage.session.set({ [APP_WINDOW_KEY]: win.id });
 }
 
-const MIN_BROWSER_WIDTH = 480;
+const MIN_HALF_WIDTH = 420;
 
 /**
- * Docks the app window to the right edge of the user's browser window, like
- * a split view — the actual point being that faculty can look at ESPro on
- * the left and the mark list on the right while filling. Shrinks the
- * browser window to make room rather than just overlapping it, so both are
- * fully visible side by side, matching its top and height exactly.
+ * Splits the screen between the browser window and the app window,
+ * 50/50 — the point being that faculty can look at ESPro on the left and
+ * the mark list on the right at equal size while filling. Both windows'
+ * combined width equals the browser's original width (so this doesn't
+ * assume anything about the physical screen size), split evenly and
+ * matching the browser's top and height exactly. Records which browser
+ * window got resized so restoreBrowserWindow() can put it back.
  *
- * Falls back to a fixed on-screen position if there's no normal browser
- * window to dock against, or not enough room to shrink it without making
- * it unreasonably narrow.
+ * Falls back to a fixed on-screen position/size if there's no normal
+ * browser window to split against, or the browser is already too narrow
+ * to halve sensibly.
  */
-async function arrangeSideBySide(): Promise<{ left: number; top: number; height: number }> {
+async function arrangeSideBySide(): Promise<{ left: number; top: number; width: number; height: number }> {
   try {
     const browserWin = await chrome.windows.getLastFocused({ windowTypes: ["normal"] });
     if (
@@ -113,26 +122,47 @@ async function arrangeSideBySide(): Promise<{ left: number; top: number; height:
       browserWin.width !== undefined &&
       browserWin.height !== undefined
     ) {
-      const shrunkWidth = browserWin.width - APP_WINDOW_WIDTH;
-      if (shrunkWidth >= MIN_BROWSER_WIDTH) {
+      const halfWidth = Math.floor(browserWin.width / 2);
+      if (halfWidth >= MIN_HALF_WIDTH) {
         await chrome.windows.update(browserWin.id, {
           left: browserWin.left,
           top: browserWin.top,
-          width: shrunkWidth,
+          width: halfWidth,
           height: browserWin.height,
         });
-        return { left: browserWin.left + shrunkWidth, top: browserWin.top, height: browserWin.height };
+        await chrome.storage.session.set({ [DOCKED_BROWSER_WINDOW_KEY]: browserWin.id });
+        return {
+          left: browserWin.left + halfWidth,
+          top: browserWin.top,
+          width: browserWin.width - halfWidth, // remainder, so there's no gap from the floor() above
+          height: browserWin.height,
+        };
       }
-      // Not enough room to shrink the browser window further — dock against
-      // its current right edge instead of resizing it.
+      // Too narrow to halve sensibly — dock against its current right edge
+      // instead of resizing it.
       return {
         left: Math.max(20, browserWin.left + browserWin.width - 20),
         top: Math.max(60, browserWin.top + 40),
+        width: FALLBACK_APP_WINDOW_WIDTH,
         height: APP_WINDOW_HEIGHT,
       };
     }
   } catch {
-    // No focused window to dock against — fall through to a fixed default.
+    // No focused window to split against — fall through to a fixed default.
   }
-  return { left: 100, top: 100, height: APP_WINDOW_HEIGHT };
+  return { left: 100, top: 100, width: FALLBACK_APP_WINDOW_WIDTH, height: APP_WINDOW_HEIGHT };
+}
+
+/** Undoes the shrink from arrangeSideBySide() by maximizing the browser window back to full size. */
+async function restoreBrowserWindow(): Promise<void> {
+  const stored = await chrome.storage.session.get(DOCKED_BROWSER_WINDOW_KEY);
+  const windowId = stored[DOCKED_BROWSER_WINDOW_KEY] as number | undefined;
+  if (windowId === undefined) return;
+
+  try {
+    await chrome.windows.update(windowId, { state: "maximized" });
+  } catch {
+    // The browser window was already closed; nothing to restore.
+  }
+  await chrome.storage.session.remove(DOCKED_BROWSER_WINDOW_KEY);
 }

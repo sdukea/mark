@@ -6,7 +6,8 @@ export type BackgroundRequest =
   | { type: "GET_WORKBOOK" }
   | { type: "SET_WORKBOOK"; workbook: ParsedWorkbook }
   | { type: "CLEAR_WORKBOOK" }
-  | { type: "OPEN_APP_WINDOW" };
+  | { type: "OPEN_APP_WINDOW" }
+  | { type: "RESTORE_BROWSER_WINDOW" };
 
 export type BackgroundResponse =
   | { type: "WORKBOOK"; workbook: ParsedWorkbook | null }

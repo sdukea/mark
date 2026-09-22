@@ -5,7 +5,7 @@ import { parseWorkbook } from "@/parser/xlsxParser";
 import { matchStudents } from "@/matcher/matchStudents";
 import type { FillPlanEntry } from "@/espro/fillPlan";
 import { FillStatusBadge, PreviewTable, StatusBadge } from "./PreviewTable";
-import { getActiveTab, isExtensionContext, sendToBackground, sendToContent } from "./messaging";
+import { getActiveTab, isExtensionContext, restoreBrowserWindow, sendToBackground, sendToContent } from "./messaging";
 
 type Phase =
   | { name: "no-file" }
@@ -241,7 +241,13 @@ export function App() {
       )}
 
       {phase.name === "completed" && (
-        <CompletedScreen outcomes={phase.outcomes} onDone={() => setPhase({ name: "no-file" })} />
+        <CompletedScreen
+          outcomes={phase.outcomes}
+          onDone={() => {
+            void restoreBrowserWindow();
+            setPhase({ name: "no-file" });
+          }}
+        />
       )}
     </div>
   );

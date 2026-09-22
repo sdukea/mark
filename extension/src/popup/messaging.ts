@@ -18,6 +18,12 @@ export async function openOrFocusAppWindow(): Promise<void> {
   await sendToBackground({ type: "OPEN_APP_WINDOW" });
 }
 
+/** Undoes the side-by-side split: maximizes the browser window back to full size. */
+export async function restoreBrowserWindow(): Promise<void> {
+  if (!isExtensionContext()) return;
+  await sendToBackground({ type: "RESTORE_BROWSER_WINDOW" });
+}
+
 export interface ActiveTabInfo {
   tabId: number;
   url: string | null;

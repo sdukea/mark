@@ -69,9 +69,9 @@ async function openOrFocusAppWindow(): Promise<void> {
     }
   }
 
-  const { left, top } = await computeWindowPosition();
+  const { left, top, height } = await arrangeSideBySide();
   const url = chrome.runtime.getURL("src/popup/index.html") + "?app=1";
-  const bounds = { left, top, width: APP_WINDOW_WIDTH, height: APP_WINDOW_HEIGHT };
+  const bounds = { left, top, width: APP_WINDOW_WIDTH, height };
   console.log("[Mark] creating app window", bounds);
 
   const win = await chrome.windows.create({ url, type: "popup", state: "normal", ...bounds, focused: true });
@@ -90,28 +90,49 @@ async function openOrFocusAppWindow(): Promise<void> {
   await chrome.storage.session.set({ [APP_WINDOW_KEY]: win.id });
 }
 
+const MIN_BROWSER_WIDTH = 480;
+
 /**
- * Chrome's default placement for a new window anchors it near wherever the
- * toolbar icon was clicked. Since that icon sits right at the top edge of
- * the screen, an un-positioned window can end up with most of its height
- * computed above the visible screen — leaving only a tiny sliver on
- * screen. Anchoring explicitly off the last-focused normal browser
- * window's bounds (with a safe minimum top/left) keeps the whole window
- * on screen. Uses getLastFocused rather than getCurrent since this code
- * runs in the service worker, which has no window of its own to be
- * "current" relative to.
+ * Docks the app window to the right edge of the user's browser window, like
+ * a split view — the actual point being that faculty can look at ESPro on
+ * the left and the mark list on the right while filling. Shrinks the
+ * browser window to make room rather than just overlapping it, so both are
+ * fully visible side by side, matching its top and height exactly.
+ *
+ * Falls back to a fixed on-screen position if there's no normal browser
+ * window to dock against, or not enough room to shrink it without making
+ * it unreasonably narrow.
  */
-async function computeWindowPosition(): Promise<{ left: number; top: number }> {
+async function arrangeSideBySide(): Promise<{ left: number; top: number; height: number }> {
   try {
-    const win = await chrome.windows.getLastFocused({ windowTypes: ["normal"] });
-    if (win.left !== undefined && win.top !== undefined && win.width !== undefined) {
+    const browserWin = await chrome.windows.getLastFocused({ windowTypes: ["normal"] });
+    if (
+      browserWin.id !== undefined &&
+      browserWin.left !== undefined &&
+      browserWin.top !== undefined &&
+      browserWin.width !== undefined &&
+      browserWin.height !== undefined
+    ) {
+      const shrunkWidth = browserWin.width - APP_WINDOW_WIDTH;
+      if (shrunkWidth >= MIN_BROWSER_WIDTH) {
+        await chrome.windows.update(browserWin.id, {
+          left: browserWin.left,
+          top: browserWin.top,
+          width: shrunkWidth,
+          height: browserWin.height,
+        });
+        return { left: browserWin.left + shrunkWidth, top: browserWin.top, height: browserWin.height };
+      }
+      // Not enough room to shrink the browser window further — dock against
+      // its current right edge instead of resizing it.
       return {
-        left: Math.max(20, win.left + win.width - APP_WINDOW_WIDTH - 40),
-        top: Math.max(60, win.top + 80),
+        left: Math.max(20, browserWin.left + browserWin.width - 20),
+        top: Math.max(60, browserWin.top + 40),
+        height: APP_WINDOW_HEIGHT,
       };
     }
   } catch {
-    // No focused window to anchor off — fall through to a fixed default.
+    // No focused window to dock against — fall through to a fixed default.
   }
-  return { left: 100, top: 100 };
+  return { left: 100, top: 100, height: APP_WINDOW_HEIGHT };
 }

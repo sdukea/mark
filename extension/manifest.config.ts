@@ -11,9 +11,8 @@ const ESPRO_MATCH_PATTERNS = ["http://localhost:8765/*"];
 
 export default defineManifest({
   manifest_version: 3,
-  name: "ESPro Marks Assistant",
-  description:
-    "Safely transfers marks from an Excel mark list into ESPro, with matching, preview, and verification before anything is written.",
+  name: "Mark",
+  description: "Move marks from your Excel mark list into ESPro — matched, previewed, and verified before anything is written.",
   version: pkg.version,
   action: {
     default_popup: "src/popup/index.html",

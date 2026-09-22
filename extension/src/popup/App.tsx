@@ -5,12 +5,13 @@ import { parseWorkbook } from "@/parser/xlsxParser";
 import { matchStudents } from "@/matcher/matchStudents";
 import type { FillPlanEntry } from "@/espro/fillPlan";
 import { FillStatusBadge, PreviewTable, StatusBadge } from "./PreviewTable";
-import { getActiveTab, isExtensionContext, sendToBackground, sendToContent } from "./messaging";
+import { getActiveTab, isExtensionContext, isStandaloneImportTab, openStandaloneImportTab, sendToBackground, sendToContent } from "./messaging";
 
 type Phase =
   | { name: "no-file" }
   | { name: "column-selection"; buffer: ArrayBuffer; fileName: string; needs: NeedsColumnSelection }
   | { name: "file-ready"; workbook: ParsedWorkbook }
+  | { name: "imported-standalone"; workbook: ParsedWorkbook }
   | { name: "checking"; workbook: ParsedWorkbook }
   | {
       name: "preview";
@@ -33,6 +34,7 @@ export function App() {
   const [dragOver, setDragOver] = useState(false);
   const [includeAlreadyFilled, setIncludeAlreadyFilled] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const standaloneTab = isStandaloneImportTab();
 
   // Restore a workbook already loaded earlier this session (popup unmounts on close).
   useEffect(() => {
@@ -63,8 +65,8 @@ export function App() {
     }
     const workbook: ParsedWorkbook = { ...result.workbook, fileName: file.name };
     if (isExtensionContext()) await sendToBackground({ type: "SET_WORKBOOK", workbook });
-    setPhase({ name: "file-ready", workbook });
-  }, []);
+    setPhase(standaloneTab ? { name: "imported-standalone", workbook } : { name: "file-ready", workbook });
+  }, [standaloneTab]);
 
   const confirmColumns = useCallback(
     async (selection: { identifierColumn: string; markColumn: string; nameColumn: string | null }) => {
@@ -82,10 +84,21 @@ export function App() {
       }
       const workbook: ParsedWorkbook = { ...result.workbook, fileName: phase.fileName };
       if (isExtensionContext()) await sendToBackground({ type: "SET_WORKBOOK", workbook });
-      setPhase({ name: "file-ready", workbook });
+      setPhase(standaloneTab ? { name: "imported-standalone", workbook } : { name: "file-ready", workbook });
     },
-    [phase],
+    [phase, standaloneTab],
   );
+
+  const chooseFile = useCallback(() => {
+    // Only a real, persistent extension tab is safe to open a native file
+    // picker from — the toolbar popup closes as soon as it does. See
+    // isStandaloneImportTab() for why.
+    if (isExtensionContext() && !standaloneTab) {
+      openStandaloneImportTab();
+      return;
+    }
+    fileInputRef.current?.click();
+  }, [standaloneTab]);
 
   const importDifferentFile = useCallback(async () => {
     if (isExtensionContext()) await sendToBackground({ type: "CLEAR_WORKBOOK" });
@@ -187,7 +200,7 @@ export function App() {
   return (
     <div className="app">
       <header className="app__header">
-        <div className="app__title">ESPro Marks Assistant</div>
+        <div className="app__title">Mark</div>
         {phase.name !== "no-file" && (
           <button className="link-button" onClick={importDifferentFile}>
             Import a different file
@@ -205,10 +218,18 @@ export function App() {
       )}
 
       {phase.name === "no-file" && (
-        <ImportScreen dragOver={dragOver} setDragOver={setDragOver} onFile={handleFile} fileInputRef={fileInputRef} />
+        <ImportScreen
+          dragOver={dragOver}
+          setDragOver={setDragOver}
+          onFile={handleFile}
+          onChooseFile={chooseFile}
+          fileInputRef={fileInputRef}
+        />
       )}
 
       {phase.name === "column-selection" && <ColumnSelectionScreen needs={phase.needs} onConfirm={confirmColumns} />}
+
+      {phase.name === "imported-standalone" && <ImportedStandaloneScreen workbook={phase.workbook} />}
 
       {phase.name === "file-ready" && <FileReadyScreen workbook={phase.workbook} onCheck={checkEspro} />}
 
@@ -248,11 +269,13 @@ function ImportScreen({
   dragOver,
   setDragOver,
   onFile,
+  onChooseFile,
   fileInputRef,
 }: {
   dragOver: boolean;
   setDragOver: (v: boolean) => void;
   onFile: (f: File) => void;
+  onChooseFile: () => void;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
 }) {
   return (
@@ -273,7 +296,7 @@ function ImportScreen({
       <div className="dropzone__title">Import your mark list</div>
       <div className="dropzone__hint">Drag an Excel file here</div>
       <div className="dropzone__or">or</div>
-      <button className="btn btn--primary" onClick={() => fileInputRef.current?.click()}>
+      <button className="btn btn--primary" onClick={onChooseFile}>
         Choose Excel file
       </button>
       <input
@@ -287,6 +310,21 @@ function ImportScreen({
           e.target.value = "";
         }}
       />
+    </div>
+  );
+}
+
+function ImportedStandaloneScreen({ workbook }: { workbook: ParsedWorkbook }) {
+  return (
+    <div className="screen">
+      <div className="screen__title">Marks imported</div>
+      <div className="screen__hint">
+        {workbook.records.length} student{workbook.records.length === 1 ? "" : "s"} loaded from "{workbook.fileName}". This
+        tab was only needed to pick the file — click the <strong>Mark</strong> icon in your toolbar to continue.
+      </div>
+      <button className="btn btn--primary" onClick={() => window.close()}>
+        Close this tab
+      </button>
     </div>
   );
 }

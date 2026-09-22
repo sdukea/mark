@@ -4,6 +4,25 @@ export function isExtensionContext(): boolean {
   return typeof chrome !== "undefined" && !!chrome.runtime?.id;
 }
 
+/**
+ * True when this page is the dedicated "import" tab opened by
+ * openStandaloneImportTab(), as opposed to the toolbar action popup.
+ *
+ * This exists because of a real Chrome quirk: opening a native file-picker
+ * dialog from the action popup steals window focus, and Chrome auto-closes
+ * the popup on blur — so the whole popup (and its in-flight file pick) gets
+ * torn down before the change event ever fires. Regular extension tabs
+ * don't have that auto-close-on-blur behavior, so the file picker is only
+ * ever triggered directly when running in one.
+ */
+export function isStandaloneImportTab(): boolean {
+  return isExtensionContext() && new URLSearchParams(window.location.search).get("standalone") === "1";
+}
+
+export function openStandaloneImportTab(): void {
+  chrome.tabs.create({ url: chrome.runtime.getURL("src/popup/index.html") + "?standalone=1" });
+}
+
 export async function sendToBackground(message: BackgroundRequest): Promise<BackgroundResponse> {
   return chrome.runtime.sendMessage(message);
 }

@@ -4,27 +4,18 @@ export function isExtensionContext(): boolean {
   return typeof chrome !== "undefined" && !!chrome.runtime?.id;
 }
 
-/**
- * True when this page is the dedicated "import" tab opened by
- * openStandaloneImportTab(), as opposed to the toolbar action popup.
- *
- * This exists because of a real Chrome quirk: opening a native file-picker
- * dialog from the action popup steals window focus, and Chrome auto-closes
- * the popup on blur — so the whole popup (and its in-flight file pick) gets
- * torn down before the change event ever fires. Regular extension tabs
- * don't have that auto-close-on-blur behavior, so the file picker is only
- * ever triggered directly when running in one.
- */
-export function isStandaloneImportTab(): boolean {
-  return isExtensionContext() && new URLSearchParams(window.location.search).get("standalone") === "1";
-}
-
-export function openStandaloneImportTab(): void {
-  chrome.tabs.create({ url: chrome.runtime.getURL("src/popup/index.html") + "?standalone=1" });
+/** True when this page is the real, independent app window (as opposed to the tiny toolbar launcher popup). */
+export function isAppWindowContext(): boolean {
+  return new URLSearchParams(window.location.search).get("app") === "1";
 }
 
 export async function sendToBackground(message: BackgroundRequest): Promise<BackgroundResponse> {
   return chrome.runtime.sendMessage(message);
+}
+
+/** Asks the background to open (or focus) the app window. Only ever called from the launcher popup. */
+export async function openOrFocusAppWindow(): Promise<void> {
+  await sendToBackground({ type: "OPEN_APP_WINDOW" });
 }
 
 export interface ActiveTabInfo {
@@ -32,8 +23,16 @@ export interface ActiveTabInfo {
   url: string | null;
 }
 
+/**
+ * Finds the active tab in the user's browser window — NOT "the current
+ * window" relative to this script, since this script now runs inside our
+ * own separate app window (type "popup"), not anchored to the browser
+ * window the way the old default_popup was. windowTypes: ["normal"]
+ * deliberately excludes our own app window from consideration.
+ */
 export async function getActiveTab(): Promise<ActiveTabInfo | null> {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  const win = await chrome.windows.getLastFocused({ windowTypes: ["normal"], populate: true });
+  const tab = win.tabs?.find((t) => t.active);
   if (!tab?.id) return null;
   return { tabId: tab.id, url: tab.url ?? null };
 }

@@ -16,6 +16,7 @@ export default defineManifest({
   version: pkg.version,
   action: {
     default_popup: "src/popup/index.html",
+    default_title: "Mark — fill ESPro marks from Excel",
   },
   background: {
     service_worker: "src/background/index.ts",

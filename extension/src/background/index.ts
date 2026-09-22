@@ -48,6 +48,9 @@ async function handleMessage(message: BackgroundRequest): Promise<BackgroundResp
   }
 }
 
+const APP_WINDOW_WIDTH = 420;
+const APP_WINDOW_HEIGHT = 680;
+
 async function openOrFocusAppWindow(): Promise<void> {
   const stored = await chrome.storage.session.get(APP_WINDOW_KEY);
   const existingId = stored[APP_WINDOW_KEY] as number | undefined;
@@ -61,9 +64,41 @@ async function openOrFocusAppWindow(): Promise<void> {
     }
   }
 
+  const { left, top } = await computeWindowPosition();
   const url = chrome.runtime.getURL("src/popup/index.html") + "?app=1";
-  const win = await chrome.windows.create({ url, type: "popup", width: 420, height: 680 });
+  const win = await chrome.windows.create({
+    url,
+    type: "popup",
+    width: APP_WINDOW_WIDTH,
+    height: APP_WINDOW_HEIGHT,
+    left,
+    top,
+    focused: true,
+  });
   if (win?.id !== undefined) {
     await chrome.storage.session.set({ [APP_WINDOW_KEY]: win.id });
   }
+}
+
+/**
+ * Chrome's default placement for a new window anchors it near wherever the
+ * toolbar icon was clicked. Since that icon sits right at the top edge of
+ * the screen, an un-positioned window can end up with most of its height
+ * computed above the visible screen — leaving only a tiny sliver on
+ * screen. Anchoring explicitly off the current browser window's bounds
+ * (with a safe minimum top/left) keeps the whole window on screen.
+ */
+async function computeWindowPosition(): Promise<{ left: number; top: number }> {
+  try {
+    const current = await chrome.windows.getCurrent();
+    if (current.left !== undefined && current.top !== undefined && current.width !== undefined) {
+      return {
+        left: Math.max(20, current.left + current.width - APP_WINDOW_WIDTH - 40),
+        top: Math.max(60, current.top + 80),
+      };
+    }
+  } catch {
+    // No focused window to anchor off — fall through to a fixed default.
+  }
+  return { left: 100, top: 100 };
 }

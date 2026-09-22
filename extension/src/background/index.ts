@@ -21,7 +21,12 @@ const WORKBOOK_KEY = "parsedWorkbook";
  */
 const APP_WINDOW_KEY = "appWindowId";
 
+// Unconditional — if this line isn't the first thing in the service
+// worker's console after a reload, the new build isn't running yet.
+console.log("[Mark] background service worker started", new Date().toISOString());
+
 chrome.runtime.onMessage.addListener((message: BackgroundRequest, _sender, sendResponse) => {
+  console.log("[Mark] received message", message.type);
   handleMessage(message).then(sendResponse);
   return true; // keep the message channel open for the async response
 });

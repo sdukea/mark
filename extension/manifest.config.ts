@@ -14,9 +14,21 @@ export default defineManifest({
   name: "Mark",
   description: "Move marks from your Excel mark list into ESPro — matched, previewed, and verified before anything is written.",
   version: pkg.version,
+  icons: {
+    16: "icons/icon16.png",
+    32: "icons/icon32.png",
+    48: "icons/icon48.png",
+    128: "icons/icon128.png",
+  },
   action: {
     default_popup: "src/popup/index.html",
     default_title: "Mark — fill ESPro marks from Excel",
+    default_icon: {
+      16: "icons/icon16.png",
+      32: "icons/icon32.png",
+      48: "icons/icon48.png",
+      128: "icons/icon128.png",
+    },
   },
   background: {
     // Deliberately NOT named index.ts, matching content-script.ts below:

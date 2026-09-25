@@ -1,58 +1,94 @@
-<svg viewBox="0 0 980 320" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
-  <rect x="0" y="0" width="980" height="320" rx="12" fill="#f6f7f9"/>
+<svg viewBox="0 0 980 258" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <rect x="0" y="0" width="980" height="258" rx="14" fill="#f6f7f9"/>
 
-  <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="#6b7078"/>
-    </marker>
-  </defs>
+  <!-- Title -->
+  <text x="28" y="30" font-size="15" font-weight="700" fill="#1b1d22">Excel to ESPro, one gate in between</text>
+  <text x="28" y="47" font-size="11" fill="#6b7078">Every folder below is labeled where it actually does its work.</text>
 
-  <!-- Pipeline row -->
-  <g font-size="13" font-weight="600" fill="#1b1d22">
-    <!-- Excel -->
-    <rect x="24" y="60" width="150" height="72" rx="8" fill="#ffffff" stroke="#e3e5e9"/>
-    <text x="99" y="90" text-anchor="middle">Excel</text>
-    <text x="99" y="108" text-anchor="middle" font-size="11" font-weight="400" fill="#6b7078">.xlsx mark list</text>
-
-    <line x1="174" y1="96" x2="208" y2="96" stroke="#6b7078" stroke-width="1.5" marker-end="url(#arrow)"/>
-
-    <!-- Parser -->
-    <rect x="208" y="60" width="150" height="72" rx="8" fill="#ffffff" stroke="#e3e5e9"/>
-    <text x="283" y="90" text-anchor="middle">parser/</text>
-    <text x="283" y="108" text-anchor="middle" font-size="11" font-weight="400" fill="#6b7078">columns, records</text>
-
-    <line x1="358" y1="96" x2="392" y2="96" stroke="#6b7078" stroke-width="1.5" marker-end="url(#arrow)"/>
-
-    <!-- Matcher -->
-    <rect x="392" y="60" width="150" height="72" rx="8" fill="#ffffff" stroke="#e3e5e9"/>
-    <text x="467" y="90" text-anchor="middle">matcher/</text>
-    <text x="467" y="108" text-anchor="middle" font-size="11" font-weight="400" fill="#6b7078">Excel × ESPro</text>
-
-    <line x1="542" y1="96" x2="576" y2="96" stroke="#6b7078" stroke-width="1.5" marker-end="url(#arrow)"/>
-
-    <!-- Preview -->
-    <rect x="576" y="60" width="150" height="72" rx="8" fill="#ffffff" stroke="#e3e5e9"/>
-    <text x="651" y="90" text-anchor="middle">Preview</text>
-    <text x="651" y="108" text-anchor="middle" font-size="11" font-weight="400" fill="#6b7078">review &amp; confirm</text>
-
-    <line x1="726" y1="96" x2="760" y2="96" stroke="#6b7078" stroke-width="1.5" marker-end="url(#arrow)"/>
-
-    <!-- Fill + verify -->
-    <rect x="760" y="60" width="196" height="72" rx="8" fill="#2452c9"/>
-    <text x="858" y="90" text-anchor="middle" fill="#ffffff">Fill + Verify</text>
-    <text x="858" y="108" text-anchor="middle" font-size="11" font-weight="400" fill="#dce4fb">read every value back</text>
+  <!-- Connector lines, drawn under everything else -->
+  <g fill="none">
+    <!-- source curves into the stepper -->
+    <path d="M178,103 C 242,103 242,140 300,140" stroke="#d8dbe1" stroke-width="2"/>
+    <path d="M178,171 C 242,171 242,140 300,140" stroke="#d8dbe1" stroke-width="2"/>
+    <!-- read-only phase: gray -->
+    <line x1="300" y1="140" x2="674" y2="140" stroke="#d8dbe1" stroke-width="2"/>
+    <!-- writing phase, unlocked only past Confirm: green -->
+    <line x1="674" y1="140" x2="914" y2="140" stroke="#5fa77c" stroke-width="2"/>
   </g>
 
-  <!-- ESPro adapter, underneath, feeding matcher + fill -->
-  <rect x="392" y="220" width="360" height="72" rx="8" fill="#ffffff" stroke="#2452c9" stroke-width="1.5" stroke-dasharray="4 3"/>
-  <text x="572" y="250" text-anchor="middle" font-size="13" font-weight="600" fill="#2452c9">espro/ adapter</text>
-  <text x="572" y="268" text-anchor="middle" font-size="11" font-weight="400" fill="#6b7078">the only file that reads ESPro's real DOM</text>
-  <text x="572" y="283" text-anchor="middle" font-size="10.5" font-weight="400" fill="#96660a">mock-espro today → swap in the real one later</text>
+  <!-- Confirm's emphasis ring, under its circle -->
+  <circle cx="674" cy="140" r="33" fill="#2452c9" opacity="0.10"/>
 
-  <line x1="572" y1="220" x2="572" y2="140" stroke="#2452c9" stroke-width="1.5" stroke-dasharray="4 3"/>
-  <line x1="572" y1="140" x2="467" y2="140" stroke="#2452c9" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
-  <line x1="572" y1="140" x2="858" y2="140" stroke="#2452c9" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+  <!-- Source: Excel -->
+  <g>
+    <rect x="28" y="78" width="150" height="50" rx="9" fill="#ffffff" stroke="#e3e5e9"/>
+    <rect x="42" y="92" width="14" height="14" rx="2" fill="none" stroke="#6b7078" stroke-width="1.3"/>
+    <line x1="42" y1="99" x2="56" y2="99" stroke="#6b7078" stroke-width="1.3"/>
+    <line x1="49" y1="92" x2="49" y2="106" stroke="#6b7078" stroke-width="1.3"/>
+    <text x="66" y="99" font-size="12" font-weight="700" fill="#1b1d22">Excel</text>
+    <text x="66" y="113" font-size="9.5" fill="#6b7078">.xlsx mark list</text>
+    <text x="168" y="91" font-size="9.5" font-weight="700" fill="#96660a" text-anchor="end" letter-spacing="0.02em">parser/</text>
+  </g>
 
-  <text x="24" y="30" font-size="14" font-weight="700" fill="#1b1d22">READ → MATCH → VALIDATE → PREVIEW → CONFIRM → FILL → VERIFY</text>
-  <text x="24" y="48" font-size="11" fill="#6b7078">Nothing is written to ESPro without an explicit status and a human looking at the preview first.</text>
+  <!-- Source: ESPro -->
+  <g>
+    <rect x="28" y="146" width="150" height="50" rx="9" fill="#ffffff" stroke="#e3e5e9"/>
+    <rect x="42" y="160" width="14" height="12" rx="2" fill="none" stroke="#6b7078" stroke-width="1.3"/>
+    <line x1="42" y1="164" x2="56" y2="164" stroke="#6b7078" stroke-width="1.3"/>
+    <text x="66" y="167" font-size="12" font-weight="700" fill="#1b1d22">ESPro page</text>
+    <text x="66" y="181" font-size="9.5" fill="#6b7078">live marks-entry DOM</text>
+    <text x="168" y="159" font-size="9.5" font-weight="700" fill="#1b7a3d" text-anchor="end" letter-spacing="0.02em">espro/</text>
+  </g>
+
+  <!-- Stepper nodes -->
+  <!-- 1 Match -->
+  <g>
+    <circle cx="350" cy="140" r="24" fill="#ffffff" stroke="#d8dbe1" stroke-width="1.5"/>
+    <text x="350" y="145" font-size="13" font-weight="700" fill="#1b1d22" text-anchor="middle">1</text>
+    <text x="350" y="182" font-size="13" font-weight="700" fill="#1b1d22" text-anchor="middle">Match</text>
+    <text x="350" y="196" font-size="9.5" font-weight="700" fill="#7c5cbf" text-anchor="middle" letter-spacing="0.02em">matcher/</text>
+  </g>
+
+  <!-- 2 Validate -->
+  <g>
+    <circle cx="458" cy="140" r="24" fill="#ffffff" stroke="#d8dbe1" stroke-width="1.5"/>
+    <text x="458" y="145" font-size="13" font-weight="700" fill="#1b1d22" text-anchor="middle">2</text>
+    <text x="458" y="182" font-size="13" font-weight="700" fill="#1b1d22" text-anchor="middle">Validate</text>
+    <text x="458" y="196" font-size="9.5" font-weight="700" fill="#7c5cbf" text-anchor="middle" letter-spacing="0.02em">validation/</text>
+  </g>
+
+  <!-- 3 Preview -->
+  <g>
+    <circle cx="566" cy="140" r="24" fill="#ffffff" stroke="#2452c9" stroke-width="1.5"/>
+    <text x="566" y="145" font-size="13" font-weight="700" fill="#2452c9" text-anchor="middle">3</text>
+    <text x="566" y="182" font-size="13" font-weight="700" fill="#1b1d22" text-anchor="middle">Preview</text>
+    <text x="566" y="196" font-size="9.5" font-weight="700" fill="#2452c9" text-anchor="middle" letter-spacing="0.02em">popup ui</text>
+  </g>
+
+  <!-- 4 Confirm — the gate -->
+  <g>
+    <circle cx="674" cy="140" r="27" fill="#2452c9"/>
+    <text x="674" y="146" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">4</text>
+    <text x="674" y="185" font-size="13" font-weight="800" fill="#2452c9" text-anchor="middle">Confirm</text>
+    <text x="674" y="198" font-size="9.5" font-style="italic" fill="#6b7078" text-anchor="middle">you decide here</text>
+  </g>
+
+  <!-- 5 Fill -->
+  <g>
+    <circle cx="782" cy="140" r="24" fill="#ffffff" stroke="#1b7a3d" stroke-width="1.5"/>
+    <text x="782" y="145" font-size="13" font-weight="700" fill="#1b7a3d" text-anchor="middle">5</text>
+    <text x="782" y="182" font-size="13" font-weight="700" fill="#1b1d22" text-anchor="middle">Fill</text>
+    <text x="782" y="196" font-size="9.5" font-weight="700" fill="#1b7a3d" text-anchor="middle" letter-spacing="0.02em">espro/</text>
+  </g>
+
+  <!-- 6 Verify -->
+  <g>
+    <circle cx="890" cy="140" r="24" fill="#ffffff" stroke="#1b7a3d" stroke-width="1.5"/>
+    <text x="890" y="145" font-size="13" font-weight="700" fill="#1b7a3d" text-anchor="middle">6</text>
+    <text x="890" y="182" font-size="13" font-weight="700" fill="#1b1d22" text-anchor="middle">Verify</text>
+    <text x="890" y="196" font-size="9.5" font-weight="700" fill="#1b7a3d" text-anchor="middle" letter-spacing="0.02em">espro/</text>
+  </g>
+
+  <!-- Caption -->
+  <text x="28" y="234" font-size="11.5" fill="#6b7078">Nothing writes without a status on every row and a confirmed preview — and Mark stops after Verify; you press ESPro's own Save.</text>
 </svg>

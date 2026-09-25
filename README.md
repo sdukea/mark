@@ -21,7 +21,7 @@ actually landed.
 > [`extension/src/espro/`](extension/src/espro/).
 
 <p align="center">
-  <img src="docs/architecture.svg" alt="Mark's pipeline: Excel → parser → matcher → preview → fill + verify, with the espro/ adapter as the only DOM-aware piece" width="820">
+  <img src="docs/architecture.svg" alt="Excel and the live ESPro page feed into a six-step pipeline — Match, Validate, Preview, Confirm, Fill, Verify — with Confirm highlighted as the one gate nothing can skip, each step labeled with the code module that owns it" width="820">
 </p>
 
 ## Why it's safe, not just fast

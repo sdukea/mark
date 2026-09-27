@@ -174,3 +174,5 @@ that one file — as soon as it's available.
       ~600KB chunk; fine for a local extension, but splittable)
 - [ ] Production hardening pass: permissions review, Chrome Web Store
       packaging, accessibility pass
+
+

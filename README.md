@@ -175,4 +175,3 @@ that one file — as soon as it's available.
 - [ ] Production hardening pass: permissions review, Chrome Web Store
       packaging, accessibility pass
 
-
